@@ -1,68 +1,35 @@
 import express from 'express';
-import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { logger } from './middleware/logger.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import notesRoutes from './routes/notesRoutes.js';
+import { connectMongoDB } from './db/connectMongoDB.js';
 
 dotenv.config();
 
-export const setupServer = () => {
+const setupServer = async () => {
     const app = express();
+    const PORT = process.env.PORT || 3000;
 
-    // Middleware
+    // 1. Підключення до БД
+    await connectMongoDB();
+
+    // 2. Middlewares
+    app.use(logger);
     app.use(cors());
     app.use(express.json());
-    app.use(pino(
-        {
-            level: 'info',
-            transport: {
-                target: 'pino-pretty',
-                options: {
-                    colorize: true,
-                    translateTime: 'HH:MM:ss',
-                    ignore: 'pid,hostname',
-                    messageFormat:
-                        '{req.method} {req.url} {res.statusCode} - {responseTime}ms',
-                    hideObject: true,
-                },
-            },
-        }
-    ));
 
-    // Routes
-    app.get('/notes', (req, res) => {
-        res.status(200).json({
-            message: 'Retrieved all notes',
-        });
-    });
+    // 3. Маршрути
+    app.use(notesRoutes);
 
-    app.get('/notes/:noteId', (req, res) => {
-        const {noteId} = req.params;
-        res.status(200).json({
-            message: `Retrieved note with ID: ${noteId}`,
-        });
-    });
+    // 4. Обробка помилок (завжди в кінці)
+    app.use(notFoundHandler);
+    app.use(errorHandler);
 
-    app.get('/test-error', () => {
-        throw new Error('Simulated server error');
-    });
-
-    // 404 Middleware (має бути після маршрутів)
-    app.use((req, res) => {
-        res.status(404).json({
-            message: 'Route not found',
-        });
-    });
-
-    // 500 Middleware (має бути останнім)
-    app.use((err, req, res, next) => {
-        res.status(500).json({
-            message: err.message || 'Internal Server Error',
-        });
-    });
-
-    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
+        console.log(`🚀 Server is running on port ${PORT}`);
     });
 };
 
