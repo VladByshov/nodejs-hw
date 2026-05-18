@@ -6,6 +6,7 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import notesRoutes from './routes/notesRoutes.js';
 import { connectMongoDB } from './db/connectMongoDB.js';
+import {errors} from "celebrate";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ const setupServer = async () => {
   app.use(notesRoutes);
 
   app.use(notFoundHandler);
+  app.use(errors());
   app.use(errorHandler);
 
   app.listen(PORT, () => {
