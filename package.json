@@ -23,6 +23,7 @@
   "homepage": "https://github.com/VladByshov/nodejs-hw#readme",
   "dependencies": {
     "@eslint/js": "^10.0.1",
+    "celebrate": "^15.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
