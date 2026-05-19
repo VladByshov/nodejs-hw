@@ -20,11 +20,11 @@ export const getAllNotesSchema = celebrate({
   }),
 });
 
-export const noteIdSchema = {
+export const noteIdSchema = celebrate({
   [Segments.PARAMS]: Joi.object().keys({
     noteId: Joi.string().custom(objectValidator).required(),
   }),
-};
+});
 
 export const createNoteSchema = celebrate({
   [Segments.BODY]: Joi.object().keys({

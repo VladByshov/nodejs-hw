@@ -15,10 +15,11 @@ export const getAllNotes = async (req, res, next) => {
       ];
     }
 
-    const totalNotes = await Note.countDocuments(query);
+    const [totalNotes, notes] = await Promise.all([
+      Note.countDocuments(query),
+      Note.find(query).skip(skip).limit(Number(perPage)),
+    ]);
     const totalPages = Math.ceil(totalNotes / perPage);
-
-    const notes = await Note.find(query).skip(skip).limit(Number(perPage));
 
     res.status(200).json({
       page: Number(page),
