@@ -1,6 +1,7 @@
 import { isHttpError } from 'http-errors';
 
 export const errorHandler = (err, req, res, next) => {
+  console.error('🔥 СПРАВЖНЯ ПОМИЛКА:', err);
   if (isHttpError(err)) {
     return res.status(err.status).json({
       message: err.message,
