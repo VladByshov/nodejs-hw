@@ -7,6 +7,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 import notesRoutes from './routes/notesRoutes.js';
 import { connectMongoDB } from './db/connectMongoDB.js';
 import {errors} from "celebrate";
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -19,7 +21,9 @@ const setupServer = async () => {
   app.use(logger);
   app.use(cors());
   app.use(express.json());
+  app.use(cookieParser());
 
+  app.use('/auth', authRoutes);
   app.use(notesRoutes);
 
   app.use(notFoundHandler);
