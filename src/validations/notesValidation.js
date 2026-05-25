@@ -1,4 +1,4 @@
-import { Joi, celebrate, Segments } from 'celebrate';
+import { celebrate, Segments, Joi } from 'celebrate';
 import { isValidObjectId } from 'mongoose';
 import { TAGS } from '../constants/tags.js';
 
@@ -8,6 +8,10 @@ const objectValidator = (value, helpers) => {
   }
   return value;
 };
+
+const noteIdJoiSchema = Joi.object().keys({
+  noteId: Joi.string().custom(objectValidator).required(),
+});
 
 export const getAllNotesSchema = celebrate({
   [Segments.QUERY]: Joi.object().keys({
@@ -21,9 +25,7 @@ export const getAllNotesSchema = celebrate({
 });
 
 export const noteIdSchema = celebrate({
-  [Segments.PARAMS]: Joi.object().keys({
-    noteId: Joi.string().custom(objectValidator).required(),
-  }),
+  [Segments.PARAMS]: noteIdJoiSchema,
 });
 
 export const createNoteSchema = celebrate({
@@ -37,7 +39,7 @@ export const createNoteSchema = celebrate({
 });
 
 export const updateNoteSchema = celebrate({
-  [Segments.PARAMS]: noteIdSchema[Segments.PARAMS],
+  [Segments.PARAMS]: noteIdJoiSchema,
   [Segments.BODY]: Joi.object()
     .keys({
       title: Joi.string().min(1).optional(),
