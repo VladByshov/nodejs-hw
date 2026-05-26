@@ -15,11 +15,10 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.username) {
     this.username = this.email;
   }
-  next();
 });
 
 export const User = model('user', userSchema);

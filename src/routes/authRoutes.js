@@ -9,18 +9,18 @@ import {
   registerUserSchema,
   loginUserSchema,
 } from '../validations/authValidation.js';
-import { celebrate, Segments } from 'celebrate';
+import { celebrate } from 'celebrate';
 
 const router = Router();
 
 router.post(
   '/register',
-  celebrate({ [Segments.BODY]: registerUserSchema }),
+  celebrate(registerUserSchema),
   registerUser,
 );
 router.post(
   '/login',
-  celebrate({ [Segments.BODY]: loginUserSchema }),
+  celebrate(loginUserSchema),
   loginUser,
 );
 router.post('/refresh', refreshUserSession);
