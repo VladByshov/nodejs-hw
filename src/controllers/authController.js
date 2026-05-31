@@ -3,9 +3,6 @@ import createHttpError from 'http-errors';
 import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
 import { createSession, setSessionCookies } from '../services/auth.js';
-import handlebars from 'handlebars';
-import path from 'node:path';
-import fs from 'node:fs/promises';
 import { sendEmail } from '../utils/sendMail.js';
 import jwt from 'jsonwebtoken';
 
@@ -121,23 +118,21 @@ export const requestResetEmail = async (req, res, next) => {
 
     const resetLink = `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`;
 
-    const templatePath = path.join(
-      __dirname,
-      '../templates/reset-password-email.html',
-    );
-    const templateSource = await fs.readFile(templatePath, 'utf-8');
-    const template = handlebars.compile(templateSource);
-    const html = template({ username: user.username || user.email, resetLink });
-
     try {
       await sendEmail({
         to: user.email,
         subject: 'Reset your password',
-        html,
+        templateData: {
+          name: user.username || user.email,
+          resetLink,
+        },
       });
     } catch (mailError) {
       return next(
-        createError(500, 'Failed to send the email, please try again later.'),
+        createHttpError(
+          500,
+          'Failed to send the email, please try again later.',
+        ),
       );
     }
 
@@ -155,12 +150,12 @@ export const resetPassword = async (req, res, next) => {
     try {
       payload = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
-      return next(createError(401, 'Invalid or expired token'));
+      return next(createHttpError(401, 'Invalid or expired token'));
     }
 
     const user = await User.findOne({ _id: payload.sub, email: payload.email });
     if (!user) {
-      return next(createError(404, 'User not found'));
+      return next(createHttpError(404, 'User not found'));
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
