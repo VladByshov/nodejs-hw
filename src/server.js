@@ -9,6 +9,7 @@ import { connectMongoDB } from './db/connectMongoDB.js';
 import {errors} from "celebrate";
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ const setupServer = async () => {
   app.use(cookieParser());
 
   app.use('/auth', authRoutes);
+  app.use('/users', userRoutes);
   app.use(notesRoutes);
 
   app.use(notFoundHandler);
