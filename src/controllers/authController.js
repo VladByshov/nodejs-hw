@@ -122,12 +122,14 @@ export const requestResetEmail = async (req, res, next) => {
       await sendEmail({
         to: user.email,
         subject: 'Reset your password',
+        html: `<p>Hello, ${user.username || user.email}!</p><p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
         templateData: {
           name: user.username || user.email,
           resetLink,
         },
       });
     } catch (mailError) {
+      console.error('=== КРИТИЧНА ПОМИЛКА SMTP ===', mailError);
       return next(
         createHttpError(
           500,

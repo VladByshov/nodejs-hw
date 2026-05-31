@@ -1,21 +1,27 @@
+import 'dotenv/config';
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  auth: {
-    user: process.env.SMTP_USER,
-    password: process.env.SMTP_PASSWORD,
-  },
-});
+const createTransporter = () => {
+  const port = Number(process.env.SMTP_PORT || 587);
+  const secure = process.env.SMTP_SECURE
+    ? process.env.SMTP_SECURE === 'true'
+    : port === 465;
 
-export const sendEmail = async ({ to, subject, html }) => {
-  const mailOptions = {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port,
+    secure,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+  });
+};
+
+export const sendEmail = async (options) => {
+  const transporter = createTransporter();
+  return await transporter.sendMail({
     from: process.env.SMTP_FROM,
-    to,
-    subject,
-    html,
-  };
-
-  return transporter.sendMail(mailOptions);
+    ...options,
+  });
 };
