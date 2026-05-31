@@ -121,7 +121,7 @@ export const requestResetEmail = async (req, res, next) => {
     try {
       await sendEmail({
         to: user.email,
-        subject: 'Reset your password',
+        subject: 'Reset your email',
         html: `<p>Hello, ${user.username || user.email}!</p><p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
         templateData: {
           name: user.username || user.email,
@@ -138,7 +138,7 @@ export const requestResetEmail = async (req, res, next) => {
       );
     }
 
-    res.status(200).json({ message: 'Password reset email sent successfully' });
+    res.status(200).json({ message: 'Reset email sent successfully' });
   } catch (error) {
     next(error);
   }
