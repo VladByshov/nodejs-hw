@@ -5,6 +5,9 @@ import { Session } from '../models/session.js';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { sendEmail } from '../utils/sendMail.js';
 import jwt from 'jsonwebtoken';
+import path from 'node:path';
+import handlebars from 'handlebars';
+import fs from 'node:fs/promises';
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -117,19 +120,28 @@ export const requestResetEmail = async (req, res, next) => {
     );
 
     const resetLink = `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`;
+    const templatePath = path.resolve(
+      'src',
+      'templates',
+      'reset-password-email.html',
+    );
+
+    const templateSource = await fs.readFile(templatePath, 'utf-8');
+
+    const template = handlebars.compile(templateSource);
+
+    const html = template({
+      username: user.username || user.email,
+      resetLink,
+    });
 
     try {
       await sendEmail({
         to: user.email,
-        subject: 'Reset your email',
-        html: `<p>Hello, ${user.username || user.email}!</p><p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
-        templateData: {
-          name: user.username || user.email,
-          resetLink,
-        },
+        subject: 'Reset your password',
+        html,
       });
     } catch (mailError) {
-      console.error('=== КРИТИЧНА ПОМИЛКА SMTP ===', mailError);
       return next(
         createHttpError(
           500,
@@ -138,7 +150,7 @@ export const requestResetEmail = async (req, res, next) => {
       );
     }
 
-    res.status(200).json({ message: 'Reset email sent successfully' });
+    res.status(200).json({ message: 'Password reset email sent successfully' });
   } catch (error) {
     next(error);
   }

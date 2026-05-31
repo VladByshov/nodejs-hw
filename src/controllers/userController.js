@@ -7,13 +7,12 @@ export const updateUserAvatar = async (req, res, next) => {
     if (!req.file) {
       return next(createHttpError(400, 'No file'));
     }
-
-    const cloudinaryResponse = await saveFileToCloudinary(req.file.buffer);
+    const cloudinaryResponse = await saveFileToCloudinary(req.file);
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { avatar: cloudinaryResponse.secure_url },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
     if (!updatedUser) {
