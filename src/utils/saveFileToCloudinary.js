@@ -1,6 +1,4 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { Readable } from 'stream';
-import path from 'node:path';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,17 +6,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const saveFileToCloudinary = (file) => {
+export const saveFileToCloudinary = (buffer, userId) => {
   return new Promise((resolve, reject) => {
-    const fileWithoutExt = path.parse(file.originalname).name;
-
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: 'avatars',
         resource_type: 'image',
-        public_id: fileWithoutExt,
+        public_id: userId.toString(),
         overwrite: true,
-        unique_filename: true,
+        unique_filename: false,
       },
       (error, result) => {
         if (error) return reject(error);
@@ -26,10 +22,6 @@ export const saveFileToCloudinary = (file) => {
       },
     );
 
-    const readableStream = new Readable();
-    readableStream.push(file.buffer);
-    readableStream.push(null);
-
-    readableStream.pipe(uploadStream);
+    uploadStream.end(buffer);
   });
 };
